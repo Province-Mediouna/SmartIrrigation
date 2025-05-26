@@ -1,70 +1,88 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { AlertTriangle, ClipboardList } from "lucide-react"
-import { MaintenanceTaskModal } from "@/components/maintenance/maintenance-task-modal"
-import { MaintenanceTaskDetailModal } from "@/components/maintenance/maintenance-task-detail-modal"
-import { Pagination } from "@/components/ui/pagination"
-import type { MaintenanceTask } from "@/types/maintenance"
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle, ClipboardList } from "lucide-react";
+import { MaintenanceTaskModal } from "@/components/maintenance/maintenance-task-modal";
+import { MaintenanceTaskDetailModal } from "@/components/maintenance/maintenance-task-detail-modal";
+import { Pagination } from "@/components/ui/pagination";
+import type { MaintenanceTask } from "@/types/maintenance";
 
 interface MaintenanceTaskListProps {
-  tasks: MaintenanceTask[]
-  loading: boolean
-  error: Error | null
-  onRefresh: () => void
+  tasks: MaintenanceTask[];
+  loading: boolean;
+  error: Error | null;
+  onRefresh: () => void;
+  totalItems: number;
+  currentPage: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
 }
 
-export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: MaintenanceTaskListProps) {
-  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null)
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+export function MaintenanceTaskList({
+  tasks,
+  loading,
+  error,
+  onRefresh,
+  totalItems,
+  currentPage,
+  itemsPerPage,
+  onPageChange,
+}: MaintenanceTaskListProps) {
+  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(
+    null
+  );
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleTaskClick = (task: MaintenanceTask) => {
-    setSelectedTask(task)
-    setIsDetailModalOpen(true)
-  }
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
+  };
 
   const handleEditClick = (task: MaintenanceTask) => {
-    setSelectedTask(task)
-    setIsEditModalOpen(true)
-  }
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-500"
+        return "bg-red-500";
       case "medium":
-        return "bg-orange-500"
+        return "bg-orange-500";
       case "low":
-        return "bg-blue-500"
+        return "bg-blue-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       case "in_progress":
-        return "bg-blue-500"
+        return "bg-blue-500";
       case "completed":
-        return "bg-green-500"
+        return "bg-green-500";
       case "cancelled":
-        return "bg-gray-500"
+        return "bg-gray-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="space-y-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+          <div
+            key={i}
+            className="flex items-center justify-between p-4 border rounded-lg"
+          >
             <div className="space-y-2">
               <Skeleton className="h-5 w-64" />
               <Skeleton className="h-4 w-32" />
@@ -76,7 +94,7 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -91,7 +109,7 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
           Try Again
         </Button>
       </div>
-    )
+    );
   }
 
   if (tasks.length === 0) {
@@ -101,7 +119,7 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
         <h3 className="mt-2 text-lg font-medium">No maintenance tasks found</h3>
         <p className="mt-1 text-gray-500">Create a new task to get started</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -129,14 +147,23 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
             </div>
           </div>
           <div className="flex space-x-2 mt-2 sm:mt-0">
-            <Badge className={getPriorityColor(task.priority)}>{task.priority}</Badge>
-            <Badge className={getStatusColor(task.status)}>{task.status.replace("_", " ")}</Badge>
+            <Badge className={getPriorityColor(task.priority)}>
+              {task.priority}
+            </Badge>
+            <Badge className={getStatusColor(task.status)}>
+              {task.status.replace("_", " ")}
+            </Badge>
           </div>
         </div>
       ))}
 
       <div className="mt-6">
-        <Pagination totalItems={tasks.length} itemsPerPage={10} currentPage={1} onPageChange={() => {}} />
+        <Pagination
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
+        />
       </div>
 
       {selectedTask && (
@@ -144,13 +171,13 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
           <MaintenanceTaskDetailModal
             isOpen={isDetailModalOpen}
             onClose={() => {
-              setIsDetailModalOpen(false)
-              setSelectedTask(null)
+              setIsDetailModalOpen(false);
+              setSelectedTask(null);
             }}
             task={selectedTask}
             onEdit={() => {
-              setIsDetailModalOpen(false)
-              setIsEditModalOpen(true)
+              setIsDetailModalOpen(false);
+              setIsEditModalOpen(true);
             }}
             onRefresh={onRefresh}
           />
@@ -158,8 +185,8 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
           <MaintenanceTaskModal
             open={isEditModalOpen}
             onClose={() => {
-              setIsEditModalOpen(false)
-              setSelectedTask(null)
+              setIsEditModalOpen(false);
+              setSelectedTask(null);
             }}
             task={selectedTask}
             onTaskCreated={onRefresh}
@@ -167,5 +194,5 @@ export function MaintenanceTaskList({ tasks, loading, error, onRefresh }: Mainte
         </>
       )}
     </div>
-  )
+  );
 }

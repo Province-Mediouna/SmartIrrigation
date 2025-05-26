@@ -29,6 +29,8 @@ export default function MaintenancePage() {
     from: new Date(),
     to: addDays(new Date(), 30),
   })
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const filter: MaintenanceTaskFilter = {
     status: statusFilter,
@@ -36,9 +38,11 @@ export default function MaintenancePage() {
     search: searchQuery,
     startDate: dateRange.from,
     endDate: dateRange.to,
+    page: currentPage,
+    size: pageSize,
   }
 
-  const { tasks, loading, error, refreshTasks } = useMaintenanceTasks(filter)
+  const { tasks, loading, error, refreshTasks, total } = useMaintenanceTasks(filter)
   const { stats } = useMaintenanceStats()
 
   const handleRefresh = () => {
@@ -159,7 +163,16 @@ export default function MaintenancePage() {
               </div>
             </CardHeader>
             <CardContent>
-              <MaintenanceTaskList tasks={tasks} loading={loading} error={error} onRefresh={refreshTasks} />
+              <MaintenanceTaskList
+                tasks={tasks}
+                loading={loading}
+                error={error}
+                onRefresh={refreshTasks}
+                totalItems={total}
+                currentPage={currentPage}
+                itemsPerPage={pageSize}
+                onPageChange={setCurrentPage}
+              />
             </CardContent>
           </Card>
         </TabsContent>
