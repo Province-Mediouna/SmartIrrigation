@@ -8,6 +8,8 @@ import type {
   EfficiencyMetrics,
   AnalyticsParameters,
   AnalyticsTimeframe,
+  PredictionRequest,
+  ComparisonRequest,
 } from "../types/analytics"
 
 class AnalyticsService extends ApiService {
@@ -173,6 +175,26 @@ class AnalyticsService extends ApiService {
       return await this.post<any>(`${this.ANALYTICS_ENDPOINT}/custom-report`, params)
     } catch (error) {
       console.error("Failed to generate custom report:", error)
+      throw error
+    }
+  }
+
+  // Prédictions personnalisées (POST)
+  async postPredictions(request: PredictionRequest): Promise<YieldPrediction[]> {
+    try {
+      return await this.post<YieldPrediction[]>(`${this.ANALYTICS_ENDPOINT}/predictions`, request)
+    } catch (error) {
+      console.error("Failed to fetch predictions (POST):", error)
+      throw error
+    }
+  }
+
+  // Comparaison de périodes (POST)
+  async postComparisons(request: ComparisonRequest): Promise<CropComparisonData[]> {
+    try {
+      return await this.post<CropComparisonData[]>(`${this.ANALYTICS_ENDPOINT}/comparisons`, request)
+    } catch (error) {
+      console.error("Failed to fetch comparisons (POST):", error)
       throw error
     }
   }

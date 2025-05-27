@@ -1,5 +1,5 @@
 import { ApiService } from "./api-service"
-import type { WeatherForecast, WeatherHistory, WeatherAlert, WeatherStation, WeatherParameters } from "../types/weather"
+import type { WeatherForecast, WeatherPattern } from "../types/weather"
 
 class WeatherService extends ApiService {
   private readonly WEATHER_ENDPOINT = "/weather"
@@ -9,18 +9,18 @@ class WeatherService extends ApiService {
   private readonly STATIONS_ENDPOINT = "/weather/stations"
 
   // Prévisions météorologiques
-  async getForecast(params?: WeatherParameters): Promise<WeatherForecast[]> {
+  async getForecast(params?: any): Promise<any[]> {
     try {
-      return await this.get<WeatherForecast[]>(this.FORECAST_ENDPOINT, { params })
+      return await this.get<any[]>(this.FORECAST_ENDPOINT, { params })
     } catch (error) {
       console.error("Failed to fetch weather forecast:", error)
       throw error
     }
   }
 
-  async getForecastByLocation(latitude: number, longitude: number, days = 7): Promise<WeatherForecast[]> {
+  async getForecastByLocation(latitude: number, longitude: number, days = 7): Promise<any[]> {
     try {
-      return await this.get<WeatherForecast[]>(`${this.FORECAST_ENDPOINT}/location`, {
+      return await this.get<any[]>(`${this.FORECAST_ENDPOINT}/location`, {
         params: { latitude, longitude, days },
       })
     } catch (error) {
@@ -30,9 +30,9 @@ class WeatherService extends ApiService {
   }
 
   // Historique météorologique
-  async getWeatherHistory(startDate: Date, endDate: Date, params?: WeatherParameters): Promise<WeatherHistory[]> {
+  async getWeatherHistory(startDate: Date, endDate: Date, params?: any): Promise<any[]> {
     try {
-      return await this.get<WeatherHistory[]>(this.HISTORY_ENDPOINT, {
+      return await this.get<any[]>(this.HISTORY_ENDPOINT, {
         params: {
           ...params,
           startDate: startDate.toISOString(),
@@ -50,9 +50,9 @@ class WeatherService extends ApiService {
     longitude: number,
     startDate: Date,
     endDate: Date,
-  ): Promise<WeatherHistory[]> {
+  ): Promise<any[]> {
     try {
-      return await this.get<WeatherHistory[]>(`${this.HISTORY_ENDPOINT}/location`, {
+      return await this.get<any[]>(`${this.HISTORY_ENDPOINT}/location`, {
         params: {
           latitude,
           longitude,
@@ -67,18 +67,18 @@ class WeatherService extends ApiService {
   }
 
   // Alertes météorologiques
-  async getWeatherAlerts(params?: WeatherParameters): Promise<WeatherAlert[]> {
+  async getWeatherAlerts(params?: any): Promise<any[]> {
     try {
-      return await this.get<WeatherAlert[]>(this.ALERTS_ENDPOINT, { params })
+      return await this.get<any[]>(this.ALERTS_ENDPOINT, { params })
     } catch (error) {
       console.error("Failed to fetch weather alerts:", error)
       throw error
     }
   }
 
-  async getWeatherAlertsByLocation(latitude: number, longitude: number): Promise<WeatherAlert[]> {
+  async getWeatherAlertsByLocation(latitude: number, longitude: number): Promise<any[]> {
     try {
-      return await this.get<WeatherAlert[]>(`${this.ALERTS_ENDPOINT}/location`, {
+      return await this.get<any[]>(`${this.ALERTS_ENDPOINT}/location`, {
         params: { latitude, longitude },
       })
     } catch (error) {
@@ -88,27 +88,27 @@ class WeatherService extends ApiService {
   }
 
   // Stations météorologiques
-  async getWeatherStations(): Promise<WeatherStation[]> {
+  async getWeatherStations(): Promise<any[]> {
     try {
-      return await this.get<WeatherStation[]>(this.STATIONS_ENDPOINT)
+      return await this.get<any[]>(this.STATIONS_ENDPOINT)
     } catch (error) {
       console.error("Failed to fetch weather stations:", error)
       throw error
     }
   }
 
-  async getWeatherStationById(stationId: string): Promise<WeatherStation> {
+  async getWeatherStationById(stationId: string): Promise<any> {
     try {
-      return await this.get<WeatherStation>(`${this.STATIONS_ENDPOINT}/${stationId}`)
+      return await this.get<any>(`${this.STATIONS_ENDPOINT}/${stationId}`)
     } catch (error) {
       console.error(`Failed to fetch weather station with ID ${stationId}:`, error)
       throw error
     }
   }
 
-  async getWeatherStationData(stationId: string, startDate: Date, endDate: Date): Promise<WeatherHistory[]> {
+  async getWeatherStationData(stationId: string, startDate: Date, endDate: Date): Promise<any[]> {
     try {
-      return await this.get<WeatherHistory[]>(`${this.STATIONS_ENDPOINT}/${stationId}/data`, {
+      return await this.get<any[]>(`${this.STATIONS_ENDPOINT}/${stationId}/data`, {
         params: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
@@ -121,22 +121,32 @@ class WeatherService extends ApiService {
   }
 
   // Conditions météorologiques actuelles
-  async getCurrentWeather(params?: WeatherParameters): Promise<WeatherForecast> {
+  async getCurrentWeather(params?: any): Promise<any> {
     try {
-      return await this.get<WeatherForecast>(`${this.WEATHER_ENDPOINT}/current`, { params })
+      return await this.get<any>(`${this.WEATHER_ENDPOINT}/current`, { params })
     } catch (error) {
       console.error("Failed to fetch current weather:", error)
       throw error
     }
   }
 
-  async getCurrentWeatherByLocation(latitude: number, longitude: number): Promise<WeatherForecast> {
+  async getCurrentWeatherByLocation(latitude: number, longitude: number): Promise<any> {
     try {
-      return await this.get<WeatherForecast>(`${this.WEATHER_ENDPOINT}/current/location`, {
+      return await this.get<any>(`${this.WEATHER_ENDPOINT}/current/location`, {
         params: { latitude, longitude },
       })
     } catch (error) {
       console.error(`Failed to fetch current weather for location (${latitude}, ${longitude}):`, error)
+      throw error
+    }
+  }
+
+  // Motifs climatiques (patterns)
+  async getWeatherPatterns(period: string): Promise<any[]> {
+    try {
+      return await this.get<any[]>(`/weather/patterns`, { params: { period } })
+    } catch (error) {
+      console.error("Failed to fetch weather patterns:", error)
       throw error
     }
   }

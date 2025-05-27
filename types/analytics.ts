@@ -131,3 +131,24 @@ export interface AnalyticsReport {
   size: number
   status: "COMPLETED" | "PROCESSING" | "FAILED"
 }
+
+// Requête pour les prédictions personnalisées
+export interface PredictionRequest extends AnalyticsParameters {
+  modelType?: string // ex: "yield", "water", etc.
+  period?: {
+    start: string
+    end: string
+  }
+  additionalParams?: Record<string, any>
+}
+
+// Requête pour la comparaison de périodes
+export interface ComparisonRequest {
+  periods: Array<{
+    start: string
+    end: string
+    label?: string
+  }>
+  metrics: string[] // ex: ["yield", "waterUsage", ...]
+  filters?: AnalyticsParameters
+}

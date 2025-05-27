@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { analyticsService } from "@/services/analytics-service"
 import type {
   WaterUsageData,
@@ -11,6 +11,8 @@ import type {
   EfficiencyMetrics,
   AnalyticsParameters,
   AnalyticsTimeframe,
+  PredictionRequest,
+  ComparisonRequest,
 } from "@/types/analytics"
 
 export function useWaterUsage(timeframe: AnalyticsTimeframe, params?: AnalyticsParameters) {
@@ -256,4 +258,54 @@ export function useCustomReport() {
     loading,
     error,
   }
+}
+
+// Hook pour POST /analytics/predictions
+export function usePostPredictions() {
+  const [data, setData] = useState<YieldPrediction[] | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const postPredictions = async (request: PredictionRequest) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const result = await analyticsService.postPredictions(request)
+      setData(result)
+      return result
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to fetch predictions"))
+      setData(null)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { data, loading, error, postPredictions }
+}
+
+// Hook pour POST /analytics/comparisons
+export function usePostComparisons() {
+  const [data, setData] = useState<CropComparisonData[] | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const postComparisons = async (request: ComparisonRequest) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const result = await analyticsService.postComparisons(request)
+      setData(result)
+      return result
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to fetch comparisons"))
+      setData(null)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { data, loading, error, postComparisons }
 }

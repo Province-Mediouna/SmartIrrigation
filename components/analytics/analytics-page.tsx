@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, BarChart, LineChart, PieChart, Download, RefreshCw } from "lucide-react"
+import { CalendarIcon, BarChart, LineChart, PieChart, Download, RefreshCw } from "@lucide/react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { WaterUsageChart } from "@/components/analytics/water-usage-chart"
@@ -16,6 +16,8 @@ import { SoilHealthChart } from "@/components/analytics/soil-health-chart"
 import { WeatherPatternChart } from "@/components/analytics/weather-pattern-chart"
 import { CropComparisonChart } from "@/components/analytics/crop-comparison-chart"
 import { EfficiencyMetrics } from "@/components/analytics/efficiency-metrics"
+import { usePostPredictions, usePostComparisons } from "@/hooks/use-analytics"
+import type { PredictionRequest, ComparisonRequest } from "@/types/analytics"
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<{
@@ -27,6 +29,61 @@ export default function AnalyticsPage() {
   })
   const [parcelFilter, setParcelFilter] = useState("all")
   const [cropFilter, setCropFilter] = useState("all")
+
+  // Nouveaux hooks pour POST
+  const { data: predictionData, loading: loadingPrediction, error: errorPrediction, postPredictions } = usePostPredictions()
+  const { data: comparisonData, loading: loadingComparison, error: errorComparison, postComparisons } = usePostComparisons()
+
+  // État pour le formulaire de prédiction
+  const [predictionForm, setPredictionForm] = useState<PredictionRequest>({
+    modelType: "yield",
+    period: { start: new Date().toISOString().slice(0, 10), end: new Date().toISOString().slice(0, 10) },
+    cropTypes: [],
+    additionalParams: {},
+  })
+
+  // État pour le formulaire de comparaison
+  const [comparisonForm, setComparisonForm] = useState<ComparisonRequest>({
+    periods: [
+      { start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 10), end: new Date().toISOString().slice(0, 10), label: "Période 1" },
+      { start: new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString().slice(0, 10), end: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 10), label: "Période 2" },
+    ],
+    metrics: ["yield", "waterUsage"],
+    filters: {},
+  })
+
+  // Handlers pour les formulaires
+  const handlePredictionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setPredictionForm((prev) => ({ ...prev, [name]: value }))
+  }
+  const handlePredictionPeriodChange = (which: "start" | "end", value: string) => {
+    setPredictionForm((prev) => ({ ...prev, period: { ...prev.period, [which]: value } }))
+  }
+  const handlePredictionSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    await postPredictions(predictionForm)
+  }
+
+  const handleComparisonPeriodChange = (idx: number, which: "start" | "end", value: string) => {
+    setComparisonForm((prev) => {
+      const periods = [...prev.periods]
+      periods[idx] = { ...periods[idx], [which]: value }
+      return { ...prev, periods }
+    })
+  }
+  const handleComparisonMetricChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { options } = e.target
+    const metrics: string[] = []
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) metrics.push(options[i].value)
+    }
+    setComparisonForm((prev) => ({ ...prev, metrics }))
+  }
+  const handleComparisonSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    await postComparisons(comparisonForm)
+  }
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -217,6 +274,82 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <CropComparisonChart />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Section Prédiction personnalisée */}
+      <div className="mt-10">
+        <Card>
+          <CardHeader>
+            <CardTitle>Prédiction personnalisée</CardTitle>
+            <CardDescription>Lancez une prédiction personnalisée sur la période et le modèle de votre choix</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-col md:flex-row gap-4 items-end" onSubmit={handlePredictionSubmit}>
+              <div>
+                <label className="block text-sm font-medium mb-1">Modèle</label>
+                <select name="modelType" value={predictionForm.modelType} onChange={handlePredictionChange} className="border rounded px-2 py-1">
+                  <option value="yield">Rendement</option>
+                  <option value="water">Eau</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Début</label>
+                <input type="date" value={predictionForm.period?.start || ""} onChange={e => handlePredictionPeriodChange("start", e.target.value)} className="border rounded px-2 py-1" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Fin</label>
+                <input type="date" value={predictionForm.period?.end || ""} onChange={e => handlePredictionPeriodChange("end", e.target.value)} className="border rounded px-2 py-1" />
+              </div>
+              <Button type="submit" disabled={loadingPrediction}>Lancer la prédiction</Button>
+            </form>
+            {errorPrediction && <div className="text-red-500 mt-2">Erreur : {errorPrediction.message}</div>}
+            {predictionData && (
+              <div className="mt-6">
+                <YieldPredictionChart cropType={predictionForm.modelType === "yield" ? undefined : predictionForm.modelType} />
+                {/* À remplacer par un affichage dynamique des résultats si besoin */}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Section Comparaison de périodes */}
+      <div className="mt-10">
+        <Card>
+          <CardHeader>
+            <CardTitle>Comparaison de périodes</CardTitle>
+            <CardDescription>Comparez deux périodes sur les métriques de votre choix</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-col md:flex-row gap-4 items-end" onSubmit={handleComparisonSubmit}>
+              {comparisonForm.periods.map((period, idx) => (
+                <div key={idx} className="flex flex-col">
+                  <label className="block text-sm font-medium mb-1">Période {idx + 1} - Début</label>
+                  <input type="date" value={period.start} onChange={e => handleComparisonPeriodChange(idx, "start", e.target.value)} className="border rounded px-2 py-1 mb-1" />
+                  <label className="block text-sm font-medium mb-1">Fin</label>
+                  <input type="date" value={period.end} onChange={e => handleComparisonPeriodChange(idx, "end", e.target.value)} className="border rounded px-2 py-1" />
+                </div>
+              ))}
+              <div>
+                <label className="block text-sm font-medium mb-1">Métriques</label>
+                <select multiple value={comparisonForm.metrics} onChange={handleComparisonMetricChange} className="border rounded px-2 py-1 min-w-[120px]">
+                  <option value="yield">Rendement</option>
+                  <option value="waterUsage">Eau</option>
+                  <option value="cost">Coût</option>
+                  <option value="profit">Profit</option>
+                </select>
+              </div>
+              <Button type="submit" disabled={loadingComparison}>Comparer</Button>
+            </form>
+            {errorComparison && <div className="text-red-500 mt-2">Erreur : {errorComparison.message}</div>}
+            {comparisonData && (
+              <div className="mt-6">
+                <CropComparisonChart />
+                {/* À remplacer par un affichage dynamique des résultats si besoin */}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
