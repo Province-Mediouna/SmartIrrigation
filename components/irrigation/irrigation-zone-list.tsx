@@ -1,15 +1,25 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { useIrrigationZones } from "@/hooks/use-irrigation-zones"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Droplets, Play, Pause, Plus, Ruler, Layers } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useIrrigationZones } from "@/hooks/use-irrigation-zones";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Droplets, Play, Pause, Plus, Ruler, Layers } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import { IrrigationScheduleManager } from "./irrigation-schedule-manager";
 
 export function IrrigationZoneList() {
-  const { data, isLoading, error } = useIrrigationZones()
+  const { data, isLoading, error, sendZoneCommand } = useIrrigationZones();
+  const [loadingZone, setLoadingZone] = useState<string | null>(null);
+  const [errorZone, setErrorZone] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -31,7 +41,7 @@ export function IrrigationZoneList() {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -47,7 +57,7 @@ export function IrrigationZoneList() {
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // Fallback data for preview
@@ -77,32 +87,36 @@ export function IrrigationZoneList() {
       area: 0.8,
       irrigationSystem: "SURFACE",
     },
-  ]
+  ];
 
   const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">Active</Badge>
+        return (
+          <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+            Active
+          </Badge>
+        );
       case "inactive":
-        return <Badge variant="outline">Inactive</Badge>
+        return <Badge variant="outline">Inactive</Badge>;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   const getMoistureColor = (moisture: number) => {
-    if (moisture < 40) return "text-destructive"
-    if (moisture < 60) return "text-yellow-500"
-    return "text-green-500"
-  }
+    if (moisture < 40) return "text-destructive";
+    if (moisture < 60) return "text-yellow-500";
+    return "text-green-500";
+  };
 
   return (
     <Card>
@@ -124,7 +138,9 @@ export function IrrigationZoneList() {
             <div key={zone.id} className="rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Droplets className={`h-4 w-4 ${getMoistureColor(zone.moisture)}`} />
+                  <Droplets
+                    className={`h-4 w-4 ${getMoistureColor(zone.moisture)}`}
+                  />
                   <span className="font-medium">{zone.name}</span>
                 </div>
                 <div>{getStatusBadge(zone.status)}</div>
@@ -142,7 +158,9 @@ export function IrrigationZoneList() {
               <div className="mt-2">
                 <div className="mb-1 flex items-center justify-between text-xs">
                   <span>Humidité du sol</span>
-                  <span className={getMoistureColor(zone.moisture)}>{zone.moisture}%</span>
+                  <span className={getMoistureColor(zone.moisture)}>
+                    {zone.moisture}%
+                  </span>
                 </div>
                 <Progress value={zone.moisture} className="h-2" />
               </div>
@@ -154,8 +172,21 @@ export function IrrigationZoneList() {
                   variant={zone.status === "active" ? "destructive" : "default"}
                   size="sm"
                   className="h-7 gap-1 px-2 text-xs"
+                  disabled={loadingZone === zone.id}
+                  onClick={async () => {
+                    setErrorZone(null);
+                    setLoadingZone(zone.id);
+                    const success = await sendZoneCommand(
+                      zone.id,
+                      zone.status === "active" ? "CLOSE" : "OPEN"
+                    );
+                    if (!success) setErrorZone(zone.id);
+                    setLoadingZone(null);
+                  }}
                 >
-                  {zone.status === "active" ? (
+                  {loadingZone === zone.id ? (
+                    <span>...</span>
+                  ) : zone.status === "active" ? (
                     <>
                       <Pause className="h-3 w-3" /> Arrêter
                     </>
@@ -166,10 +197,18 @@ export function IrrigationZoneList() {
                   )}
                 </Button>
               </div>
+              {errorZone === zone.id && (
+                <div className="text-xs text-red-500 mt-1">
+                  Erreur lors de l'envoi de la commande.
+                </div>
+              )}
+              <div className="mt-4">
+                <IrrigationScheduleManager zoneId={zone.id} />
+              </div>
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

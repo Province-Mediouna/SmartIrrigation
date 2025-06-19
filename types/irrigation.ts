@@ -62,3 +62,19 @@ export interface OptimizationRequest {
     priorityZones?: string[]
   }
 }
+
+export interface OptimizationResult {
+  zones: IrrigationZone[]
+  schedules: IrrigationSchedule[]
+  events: IrrigationEvent[]
+}
+
+export interface IrrigationSettings {
+  id: string
+  zoneId: string
+  waterSavingTarget: number
+  useWeatherForecast: boolean
+  useSoilMoisture: boolean
+  useCropType: boolean
+  priorityZones: string[]
+}

@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TelemetryHealth } from "@/components/telemetry/telemetry-health";
 import { MetricChart } from "@/components/telemetry/metric-chart";
 import { StationCreateModal } from "@/components/stations/station-create-modal";
+import { StationsMap } from "./stations-map";
 
 export default function StationsPage() {
   const [page, setPage] = useState(1);
@@ -42,6 +43,9 @@ export default function StationsPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-6">
+      <div className="mb-8">
+        <StationsMap />
+      </div>
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Stations météo</h1>

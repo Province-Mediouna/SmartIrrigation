@@ -1,22 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { apiService } from "@/services/api-service"
+import { useState, useEffect } from "react";
+import { apiService } from "@/services/api-service";
+import { iotService } from "@/services/iot-service";
 
 export function useIrrigationZones() {
-  const [data, setData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchZones = async () => {
       try {
-        setIsLoading(true)
-        const response = await apiService.get("/irrigation/zones")
-        setData(response)
-        setError(null)
+        setIsLoading(true);
+        const response = await apiService.get("/irrigation/zones");
+        setData(response);
+        setError(null);
       } catch (err) {
-        setError(err)
+        setError(err);
         // For demo purposes, set mock data
         setData([
           {
@@ -40,17 +41,30 @@ export function useIrrigationZones() {
             moisture: 42,
             nextSchedule: "2023-05-14T12:15:00Z",
           },
-        ])
+        ]);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchZones()
+    fetchZones();
     // Refresh every 5 minutes
-    const interval = setInterval(fetchZones, 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [])
+    const interval = setInterval(fetchZones, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  return { data, isLoading, error }
+  const sendZoneCommand = async (zoneId: string, action: "OPEN" | "CLOSE") => {
+    try {
+      // On suppose que le deviceId correspond à zoneId (adapter si besoin)
+      await iotService.sendCommand(zoneId, { action });
+      // Optionnel : rafraîchir les données après action
+      // await fetchZones()
+      return true;
+    } catch (err) {
+      console.error("Erreur lors de l'envoi de la commande:", err);
+      return false;
+    }
+  };
+
+  return { data, isLoading, error, sendZoneCommand };
 }
