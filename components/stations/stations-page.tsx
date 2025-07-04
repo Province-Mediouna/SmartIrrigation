@@ -20,7 +20,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TelemetryHealth } from "@/components/telemetry/telemetry-health";
 import { MetricChart } from "@/components/telemetry/metric-chart";
 import { StationCreateModal } from "@/components/stations/station-create-modal";
-import { StationsMap } from "./stations-map";
+import dynamic from "next/dynamic";
+
+const StationsMap = dynamic(() => import("./stations-map"), { ssr: false });
 
 export default function StationsPage() {
   const [page, setPage] = useState(1);

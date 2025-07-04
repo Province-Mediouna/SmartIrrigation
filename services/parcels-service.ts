@@ -7,6 +7,7 @@ import type {
 } from "../types/parcel";
 import type { Crop } from "../types/crop";
 import type { Soil } from "../types/soil";
+import { MOCK_PARCELS } from "@/lib/mocks/parcel-mocks";
 
 export interface ParcelFilters {
   page?: number;
@@ -390,6 +391,15 @@ class ParcelsService extends ApiService {
         error
       );
       throw error;
+    }
+  }
+
+  async getAllParcels(): Promise<Parcel[]> {
+    try {
+      return await this.get<Parcel[]>("parcels");
+    } catch (error) {
+      console.warn("API parcelles indisponible, utilisation des mockups.");
+      return MOCK_PARCELS;
     }
   }
 }

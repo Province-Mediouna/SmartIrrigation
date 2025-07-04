@@ -1,70 +1,78 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useKeycloak } from "@/hooks/use-keycloak";
-import { FallbackAuth } from "./fallback-auth";
 
-export const KeycloakContext = createContext<
-  ReturnType<typeof useKeycloak> | undefined
->(undefined);
+interface KeycloakContextType {
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  isLoading: boolean;
+  userInfo: any;
+  error: string | null;
+  login: (redirectUri?: string) => Promise<void>;
+  logout: (redirectUri?: string) => Promise<void>;
+  hasRole: (role: string) => boolean;
+  getToken: () => string | undefined;
+  resetKeycloak: () => Promise<void>;
+  isFallbackMode: boolean;
+  webCryptoAvailable: boolean;
+  forceFallbackMode: () => void;
+  keycloak: any;
+  initKeycloak: () => Promise<void>;
+}
 
-export function KeycloakProvider({ children }: { children: ReactNode }) {
-  const keycloakAuth = useKeycloak();
-  const [isLoading, setIsLoading] = useState(true);
+const KeycloakContext = createContext<KeycloakContextType | undefined>(
+  undefined
+);
+
+export function KeycloakProvider({ children }: { children: React.ReactNode }) {
+  const keycloakHook = useKeycloak();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    if (!keycloakAuth.isInitialized && !keycloakAuth.isLoading) {
-      keycloakAuth.initKeycloak();
-    }
+    setIsClient(true);
+  }, []);
 
-    if (keycloakAuth.isInitialized) {
-      setIsLoading(false);
+  useEffect(() => {
+    // Initialiser Keycloak seulement côté client
+    if (isClient && !keycloakHook.isInitialized && !keycloakHook.isLoading) {
+      console.log("🚀 Initialisation de Keycloak...");
+      keycloakHook.initKeycloak();
     }
-  }, [keycloakAuth]);
+  }, [
+    isClient,
+    keycloakHook.isInitialized,
+    keycloakHook.isLoading,
+    keycloakHook.initKeycloak,
+  ]);
 
-  if (isLoading) {
+  // Afficher un écran de chargement pendant l'initialisation côté client
+  if (!isClient) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
+            Chargement de l'application...
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (keycloakAuth.isFallbackMode) {
-    return (
-      <KeycloakContext.Provider value={keycloakAuth}>
-        <FallbackAuth
-          onSuccess={(token: string, user: any) => {
-            console.log("Fallback login success:", user);
-          }}
-          onError={(error: string) => {
-            console.error("Fallback login error:", error);
-          }}
-        />
-        {children}
-      </KeycloakContext.Provider>
-    );
-  }
-
   return (
-    <KeycloakContext.Provider value={keycloakAuth}>
+    <KeycloakContext.Provider value={keycloakHook}>
       {children}
     </KeycloakContext.Provider>
   );
 }
 
-export function useKeycloakAuth() {
+export function useKeycloakContext() {
   const context = useContext(KeycloakContext);
-
-  if (!context) {
-    throw new Error("useKeycloakAuth must be used within a KeycloakProvider");
+  if (context === undefined) {
+    throw new Error(
+      "useKeycloakContext doit être utilisé dans un KeycloakProvider"
+    );
   }
-
   return context;
 }

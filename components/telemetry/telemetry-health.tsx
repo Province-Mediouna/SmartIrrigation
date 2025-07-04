@@ -25,9 +25,9 @@ export function TelemetryHealth({
           <CardTitle className="text-sm font-medium">
             Santé du système
           </CardTitle>
-          <CardDescription>
+          <div className="text-sm text-muted-foreground pt-1">
             <Skeleton className="h-4 w-24" />
-          </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">

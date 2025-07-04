@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useKeycloakAuth } from "@/components/auth/keycloak-provider"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useKeycloakContext } from "@/components/auth/keycloak-provider";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,16 +10,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, User, Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/dropdown-menu";
+import { LogOut, User, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LifeBuoy } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
 
 export function AuthStatus() {
-  const { isAuthenticated, isLoading, userInfo, logout } = useKeycloakAuth()
-  const router = useRouter()
+  const { isAuthenticated, isLoading, userInfo, logout } = useKeycloakContext();
+  const router = useRouter();
 
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Chargement...</div>
+    return <Skeleton className="h-8 w-8 rounded-full" />;
   }
 
   if (!isAuthenticated) {
@@ -27,13 +29,13 @@ export function AuthStatus() {
       <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
         Se connecter
       </Button>
-    )
+    );
   }
 
   const handleLogout = async () => {
-    await logout()
-    router.push("/login")
-  }
+    await logout();
+    router.push("/login");
+  };
 
   const initials = userInfo?.name
     ? userInfo.name
@@ -41,16 +43,16 @@ export function AuthStatus() {
         .map((n: string) => n[0])
         .join("")
         .toUpperCase()
-    : "U"
+    : "U";
 
-  const displayName = userInfo?.name || userInfo?.preferred_username || "Utilisateur"
+  const displayName =
+    userInfo?.name || userInfo?.preferred_username || "Utilisateur";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={userInfo?.avatar || "/placeholder.svg"} alt={displayName} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -59,7 +61,9 @@ export function AuthStatus() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground">{userInfo?.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {userInfo?.email || "Pas d'email"}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -78,5 +82,5 @@ export function AuthStatus() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

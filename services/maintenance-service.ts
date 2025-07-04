@@ -1,5 +1,6 @@
 import { ApiService } from "./api-service"
 import type { MaintenanceTask, MaintenanceTaskFilter, MaintenanceTaskCreate } from "../types/maintenance"
+import { MOCK_MAINTENANCE_TASKS } from "@/lib/mocks/maintenance-mocks"
 
 // Mock data for maintenance tasks
 const MOCK_TASKS: MaintenanceTask[] = [
@@ -232,6 +233,15 @@ class MaintenanceService extends ApiService {
     } catch (error) {
       console.error("Failed to get maintenance statistics:", error)
       throw error
+    }
+  }
+
+  async getAllTasks(): Promise<MaintenanceTask[]> {
+    try {
+      return await this.get<MaintenanceTask[]>("maintenance/tasks");
+    } catch (error) {
+      console.warn("API maintenance indisponible, utilisation des mockups.");
+      return MOCK_MAINTENANCE_TASKS;
     }
   }
 }

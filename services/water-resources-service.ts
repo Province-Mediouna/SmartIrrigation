@@ -6,6 +6,7 @@ import type {
   WaterLevelData,
   WaterUsageReport,
 } from "../types/water-resource"
+import { MOCK_WATER_RESOURCES } from "@/lib/mocks/water-resource-mocks"
 
 class WaterResourcesService extends ApiService {
   private readonly RESOURCES_ENDPOINT = "/water-resources"
@@ -15,8 +16,8 @@ class WaterResourcesService extends ApiService {
     try {
       return await this.get<WaterSource[]>(this.RESOURCES_ENDPOINT)
     } catch (error) {
-      console.error("Failed to fetch water sources:", error)
-      throw error
+      console.warn("API water-resources indisponible, utilisation des mockups.")
+      return MOCK_WATER_RESOURCES
     }
   }
 
@@ -41,8 +42,12 @@ class WaterResourcesService extends ApiService {
 
       return await this.get<{ data: WaterSource[], total: number, totalPages: number }>(this.RESOURCES_ENDPOINT, { params })
     } catch (error) {
-      console.error("Failed to fetch water sources:", error)
-      throw error
+      console.warn("API water-resources indisponible, utilisation des mockups.")
+      return {
+        data: MOCK_WATER_RESOURCES,
+        total: MOCK_WATER_RESOURCES.length,
+        totalPages: 1
+      }
     }
   } 
 
@@ -151,6 +156,15 @@ class WaterResourcesService extends ApiService {
     } catch (error) {
       console.error(`Failed to fetch availability forecast for source with ID ${sourceId}:`, error)
       throw error
+    }
+  }
+
+  async getAllWaterResources(): Promise<WaterSource[]> {
+    try {
+      return await this.get<WaterSource[]>(this.RESOURCES_ENDPOINT)
+    } catch (error) {
+      console.warn("API water-resources indisponible, utilisation des mockups.")
+      return MOCK_WATER_RESOURCES
     }
   }
 }

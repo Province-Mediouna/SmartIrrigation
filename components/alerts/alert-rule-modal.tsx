@@ -1,27 +1,43 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { useAlertRules } from "@/hooks/use-alerts"
-import { useToast } from "@/hooks/use-toast"
-import type { AlertRule } from "@/types/alert"
+import type React from "react";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useAlertRules } from "@/hooks/use-alerts";
+import { useToast } from "@/hooks/use-toast";
+import type { AlertRule } from "@/types/alert";
 
 interface AlertRuleModalProps {
-  isOpen: boolean
-  onClose: () => void
-  rule: AlertRule | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  rule: AlertRule | null;
 }
 
-export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
-  const { createRule, updateRule } = useAlertRules()
-  const { toast } = useToast()
+export function AlertRuleModal({
+  open,
+  onOpenChange,
+  rule,
+}: AlertRuleModalProps) {
+  const { createRule, updateRule } = useAlertRules();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<AlertRule>>({
     name: "",
     description: "",
@@ -34,14 +50,14 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
     severity: "medium",
     isActive: true,
     notificationChannels: ["email"],
-  })
-  const [loading, setLoading] = useState(false)
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (rule) {
       setFormData({
         ...rule,
-      })
+      });
     } else {
       setFormData({
         name: "",
@@ -55,17 +71,19 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
         severity: "medium",
         isActive: true,
         notificationChannels: ["email"],
-      })
+      });
     }
-  }, [rule, isOpen])
+  }, [rule, open]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleConditionChange = (field: string, value: any) => {
     setFormData((prev) => ({
@@ -74,60 +92,70 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
         ...prev.condition!,
         [field]: value,
       },
-    }))
-  }
+    }));
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+  };
 
   const handleSubmit = async () => {
     try {
-      setLoading(true)
-      let success = false
+      setLoading(true);
+      let success = false;
 
       if (rule) {
         // Update existing rule
-        success = await updateRule(rule.id, formData)
+        success = await updateRule(rule.id, formData);
         if (success) {
           toast({
             title: "Rule updated",
             description: "The alert rule has been updated successfully.",
-          })
+          });
         }
       } else {
         // Create new rule
-        success = await createRule(formData)
+        success = await createRule(formData);
         if (success) {
           toast({
             title: "Rule created",
             description: "The alert rule has been created successfully.",
-          })
+          });
         }
       }
 
       if (success) {
-        onClose()
+        handleClose();
       } else {
         toast({
           title: "Operation failed",
-          description: `Failed to ${rule ? "update" : "create"} the alert rule.`,
+          description: `Failed to ${
+            rule ? "update" : "create"
+          } the alert rule.`,
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error saving alert rule:", error)
+      console.error("Error saving alert rule:", error);
       toast({
         title: "Operation failed",
-        description: `An error occurred while ${rule ? "updating" : "creating"} the alert rule.`,
+        description: `An error occurred while ${
+          rule ? "updating" : "creating"
+        } the alert rule.`,
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{rule ? "Edit Alert Rule" : "Create Alert Rule"}</DialogTitle>
+          <DialogTitle>
+            {rule ? "Edit Alert Rule" : "Create Alert Rule"}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -174,12 +202,16 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
             <div className="col-span-3 grid grid-cols-3 gap-2">
               <Input
                 value={formData.condition?.parameter}
-                onChange={(e) => handleConditionChange("parameter", e.target.value)}
+                onChange={(e) =>
+                  handleConditionChange("parameter", e.target.value)
+                }
                 placeholder="Parameter"
               />
               <Select
                 value={formData.condition?.operator}
-                onValueChange={(value) => handleConditionChange('operator", value)}erator', value)}
+                onValueChange={(value) =>
+                  handleConditionChange('operator", value)}erator', value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Operator" />
@@ -196,7 +228,12 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
               <Input
                 type="number"
                 value={formData.condition?.value as number}
-                onChange={(e) => handleConditionChange("value", Number.parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleConditionChange(
+                    "value",
+                    Number.parseFloat(e.target.value)
+                  )
+                }
                 placeholder="Value"
               />
             </div>
@@ -207,7 +244,9 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
             </Label>
             <Select
               value={formData.severity}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, severity: value as any }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, severity: value as any }))
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select severity" />
@@ -227,14 +266,18 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
               <Switch
                 id="isActive"
                 checked={formData.isActive}
-                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, isActive: checked }))
+                }
               />
-              <Label htmlFor="isActive">{formData.isActive ? "Enabled" : "Disabled"}</Label>
+              <Label htmlFor="isActive">
+                {formData.isActive ? "Enabled" : "Disabled"}
+              </Label>
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
@@ -243,5 +286,5 @@ export function AlertRuleModal({ isOpen, onClose, rule }: AlertRuleModalProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

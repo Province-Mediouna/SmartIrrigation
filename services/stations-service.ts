@@ -5,6 +5,7 @@ import type {
   StationTelemetry,
   FirmwareUpdate,
 } from "../types/station";
+import { MOCK_STATIONS } from "@/lib/mocks/station-mocks";
 
 class StationsService extends ApiService {
   private readonly STATIONS_ENDPOINT = "/stations";
@@ -19,8 +20,8 @@ class StationsService extends ApiService {
     try {
       return await this.get<Station[]>(this.STATIONS_ENDPOINT, { params });
     } catch (error) {
-      console.error("Failed to fetch stations:", error);
-      throw error;
+      console.warn("API stations indisponible, utilisation des mockups.");
+      return MOCK_STATIONS;
     }
   }
 

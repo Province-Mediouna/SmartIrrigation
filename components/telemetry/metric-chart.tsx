@@ -139,7 +139,9 @@ export function MetricChart({ stationId, metric }: MetricChartProps) {
             {getMetricTitle()}
           </CardTitle>
           <CardDescription>
-            <Skeleton className="h-4 w-24" />
+            <span>
+              <Skeleton className="h-4 w-24" />
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent>

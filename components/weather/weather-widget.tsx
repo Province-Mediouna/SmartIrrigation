@@ -1,25 +1,38 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Cloud, CloudRain, Droplets, Sun, Thermometer, Wind } from "lucide-react"
-import { useWeather } from "@/hooks/use-weather"
-import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Cloud,
+  CloudRain,
+  Droplets,
+  Sun,
+  Thermometer,
+  Wind,
+} from "lucide-react";
+import { useWeather } from "@/hooks/use-weather";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface WeatherWidgetProps {
-  stationId?: string
+  stationId?: string;
 }
 
 export function WeatherWidget({ stationId }: WeatherWidgetProps) {
-  const { data, isLoading, error } = useWeather(stationId)
+  const { data, isLoading, error } = useWeather(stationId);
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Météo</CardTitle>
-          <CardDescription>
+          <div className="text-sm text-muted-foreground pt-1">
             <Skeleton className="h-4 w-24" />
-          </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
@@ -37,7 +50,7 @@ export function WeatherWidget({ stationId }: WeatherWidgetProps) {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -48,10 +61,12 @@ export function WeatherWidget({ stationId }: WeatherWidgetProps) {
           <CardDescription>Erreur de chargement</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Impossible de charger les données météo. Veuillez réessayer.</p>
+          <p className="text-sm text-muted-foreground">
+            Impossible de charger les données météo. Veuillez réessayer.
+          </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // Fallback data for preview
@@ -63,20 +78,20 @@ export function WeatherWidget({ stationId }: WeatherWidgetProps) {
     windSpeed: 12,
     precipitation: 0,
     icon: "sun",
-  }
+  };
 
   const getWeatherIcon = (icon: string) => {
     switch (icon) {
       case "sun":
-        return <Sun className="h-16 w-16 text-yellow-500" />
+        return <Sun className="h-16 w-16 text-yellow-500" />;
       case "cloud":
-        return <Cloud className="h-16 w-16 text-gray-400" />
+        return <Cloud className="h-16 w-16 text-gray-400" />;
       case "rain":
-        return <CloudRain className="h-16 w-16 text-blue-400" />
+        return <CloudRain className="h-16 w-16 text-blue-400" />;
       default:
-        return <Sun className="h-16 w-16 text-yellow-500" />
+        return <Sun className="h-16 w-16 text-yellow-500" />;
     }
-  }
+  };
 
   return (
     <Card>
@@ -88,8 +103,12 @@ export function WeatherWidget({ stationId }: WeatherWidgetProps) {
         <div className="flex items-center justify-between">
           {getWeatherIcon(weatherData.icon)}
           <div className="text-right">
-            <div className="text-2xl font-bold">{weatherData.temperature}°C</div>
-            <p className="text-xs text-muted-foreground">{weatherData.condition}</p>
+            <div className="text-2xl font-bold">
+              {weatherData.temperature}°C
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {weatherData.condition}
+            </p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
@@ -112,5 +131,5 @@ export function WeatherWidget({ stationId }: WeatherWidgetProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

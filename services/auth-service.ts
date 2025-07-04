@@ -1,4 +1,5 @@
 import { apiService } from "./api-service"
+import Cookies from "js-cookie"
 
 class AuthService {
   async login(username: string, password: string): Promise<{ token: string; user: any }> {
@@ -20,7 +21,12 @@ class AuthService {
           }
 
           // Stocker dans localStorage pour la persistance
-          localStorage.setItem("auth-token", mockToken)
+          Cookies.set("AUTH_TOKEN", mockToken, {
+            path: "/",
+            expires: 1,
+            sameSite: "Lax",
+            secure: process.env.NODE_ENV === "production",
+          })
           localStorage.setItem("user-info", JSON.stringify(mockUser))
 
           return { token: mockToken, user: mockUser }
@@ -35,7 +41,12 @@ class AuthService {
             lastName: "User",
           }
 
-          localStorage.setItem("auth-token", mockToken)
+          Cookies.set("AUTH_TOKEN", mockToken, {
+            path: "/",
+            expires: 1,
+            sameSite: "Lax",
+            secure: process.env.NODE_ENV === "production",
+          })
           localStorage.setItem("user-info", JSON.stringify(mockUser))
 
           return { token: mockToken, user: mockUser }
@@ -48,7 +59,12 @@ class AuthService {
       const response = await apiService.post("/auth/login", { username, password })
 
       // Stocker le token pour les futures requêtes
-      localStorage.setItem("auth-token", response.token)
+      Cookies.set("AUTH_TOKEN", response.token, {
+        path: "/",
+        expires: 1,
+        sameSite: "Lax",
+        secure: process.env.NODE_ENV === "production",
+      })
       localStorage.setItem("user-info", JSON.stringify(response.user))
 
       return response
@@ -62,8 +78,8 @@ class AuthService {
     try {
       // Si l'API n'est pas disponible, simplement nettoyer le localStorage
       if (!process.env.NEXT_PUBLIC_API_URL) {
-        localStorage.removeItem("auth-token")
         localStorage.removeItem("user-info")
+        Cookies.remove("AUTH_TOKEN")
         return
       }
 
@@ -71,19 +87,19 @@ class AuthService {
       await apiService.post("/auth/logout", {})
 
       // Nettoyer le localStorage
-      localStorage.removeItem("auth-token")
       localStorage.removeItem("user-info")
+      Cookies.remove("AUTH_TOKEN")
     } catch (error) {
       console.error("Logout error:", error)
       // Même en cas d'erreur, on nettoie le localStorage
-      localStorage.removeItem("auth-token")
       localStorage.removeItem("user-info")
+      Cookies.remove("AUTH_TOKEN")
     }
   }
 
   getToken(): string | null {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("auth-token")
+      return Cookies.get("AUTH_TOKEN")
     }
     return null
   }

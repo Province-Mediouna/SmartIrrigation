@@ -1,18 +1,21 @@
-"use client"
+"use client";
 
-import { useWaterSources } from "@/hooks/use-water-sources"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { Droplet, Gauge, MapPin } from "lucide-react"
+import { useWaterSources } from "@/hooks/use-water-sources";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Droplet, Gauge, MapPin } from "lucide-react";
 
 interface WaterSourceListProps {
-  onSelectSource: (sourceId: string) => void
-  selectedSourceId: string | null
+  onSelectSource: (sourceId: string) => void;
+  selectedSourceId: string | null;
 }
 
-export function WaterSourceList({ onSelectSource, selectedSourceId }: WaterSourceListProps) {
-  const { data: sources, isLoading, error } = useWaterSources()
+export function WaterSourceList({
+  onSelectSource,
+  selectedSourceId,
+}: WaterSourceListProps) {
+  const { data: sources, isLoading, error } = useWaterSources();
 
   if (isLoading) {
     return (
@@ -21,23 +24,27 @@ export function WaterSourceList({ onSelectSource, selectedSourceId }: WaterSourc
           <Skeleton key={i} className="h-16 w-full" />
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="rounded-md border border-destructive/50 p-4">
-        <p className="text-sm text-destructive">Impossible de charger les sources d'eau. Veuillez réessayer.</p>
+        <p className="text-sm text-destructive">
+          Impossible de charger les sources d'eau. Veuillez réessayer.
+        </p>
       </div>
-    )
+    );
   }
 
   if (!sources || sources.length === 0) {
     return (
       <div className="rounded-md border p-4">
-        <p className="text-sm text-muted-foreground">Aucune source d'eau trouvée. Créez votre première source.</p>
+        <p className="text-sm text-muted-foreground">
+          Aucune source d'eau trouvée. Créez votre première source.
+        </p>
       </div>
-    )
+    );
   }
 
   const getSourceTypeLabel = (type: string) => {
@@ -48,20 +55,27 @@ export function WaterSourceList({ onSelectSource, selectedSourceId }: WaterSourc
       rain: "Eau de pluie",
       municipal: "Réseau municipal",
       other: "Autre",
-    }
-    return typeMap[type] || type
-  }
+    };
+    return typeMap[type] || type;
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Active</Badge>
+        return (
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+            Active
+          </Badge>
+        );
       case "inactive":
         return (
-          <Badge variant="outline" className="border-gray-200 text-gray-800 dark:border-gray-800 dark:text-gray-300">
+          <Badge
+            variant="outline"
+            className="border-gray-200 text-gray-800 dark:border-gray-800 dark:text-gray-300"
+          >
             Inactive
           </Badge>
-        )
+        );
       case "maintenance":
         return (
           <Badge
@@ -70,11 +84,11 @@ export function WaterSourceList({ onSelectSource, selectedSourceId }: WaterSourc
           >
             Maintenance
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-3">
@@ -83,7 +97,7 @@ export function WaterSourceList({ onSelectSource, selectedSourceId }: WaterSourc
           key={source.id}
           className={cn(
             "cursor-pointer rounded-lg border p-3 transition-colors hover:bg-muted",
-            selectedSourceId === source.id && "border-primary bg-muted",
+            selectedSourceId === source.id && "border-primary bg-muted"
           )}
           onClick={() => onSelectSource(source.id)}
         >
@@ -105,12 +119,13 @@ export function WaterSourceList({ onSelectSource, selectedSourceId }: WaterSourc
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               <span>
-                {source.location.latitude.toFixed(4)}, {source.location.longitude.toFixed(4)}
+                {source.location?.latitude.toFixed(4)},{" "}
+                {source.location?.longitude.toFixed(4)}
               </span>
             </div>
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }

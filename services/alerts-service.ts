@@ -7,6 +7,7 @@ import type {
   AlertType,
   AlertStats,
 } from "../types/alert";
+import { MOCK_ALERTS } from "@/lib/mocks/alert-mocks";
 
 class AlertsService extends ApiService  {
   private readonly ALERTS_ENDPOINT = "/alerts";
@@ -26,8 +27,8 @@ class AlertsService extends ApiService  {
 
       return await this.get<Alert[]>(this.ALERTS_ENDPOINT, { params });
     } catch (error) {
-      console.error("Failed to fetch alerts:", error);
-      throw error;
+      console.warn("API indisponible, utilisation des mockups pour les alertes.");
+      return MOCK_ALERTS;
     }
   }
 

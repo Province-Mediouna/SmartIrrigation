@@ -1,5 +1,6 @@
 import { ApiService } from "./api-service"
 import type { IoTDevice, DeviceCommand, DeviceStatus, DeviceConfiguration } from "../types/iot"
+import { MOCK_IOT_DEVICES } from "@/lib/mocks/iot-mocks"
 
 class IoTService extends ApiService {
   private readonly IOT_ENDPOINT = "/iot"
@@ -9,8 +10,8 @@ class IoTService extends ApiService {
     try {
       return await this.get<IoTDevice[]>(`${this.IOT_ENDPOINT}/devices`)
     } catch (error) {
-      console.error("Failed to fetch IoT devices:", error)
-      throw error
+      console.warn("API IoT indisponible, utilisation des mockups.")
+      return MOCK_IOT_DEVICES
     }
   }
 

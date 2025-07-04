@@ -1,15 +1,16 @@
-"use client"
+"use client";
 
-import { useKeycloakAuth } from "@/components/auth/keycloak-provider"
+import { useKeycloakContext } from "@/components/auth/keycloak-provider";
 
 export function useAuth() {
-  const { isAuthenticated, isLoading, userInfo, login, logout } = useKeycloakAuth()
+  const { isAuthenticated, isLoading, userInfo, login, logout } =
+    useKeycloakContext();
 
   return {
     isAuthenticated,
     isLoading,
-    user: userInfo,
+    userInfo,
     login,
     logout,
-  }
+  };
 }

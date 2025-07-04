@@ -102,22 +102,28 @@ export function MaintenanceTaskList({
       <div className="p-4 border border-red-300 rounded-lg bg-red-50">
         <div className="flex items-center text-red-600">
           <AlertTriangle className="mr-2 h-5 w-5" />
-          <span className="font-medium">Error loading maintenance tasks</span>
+          <span className="font-medium">
+            Erreur de chargement des tâches de maintenance
+          </span>
         </div>
         <p className="mt-2 text-sm text-red-600">{error.message}</p>
         <Button variant="outline" className="mt-4" onClick={onRefresh}>
-          Try Again
+          Réessayer
         </Button>
       </div>
     );
   }
 
-  if (tasks.length === 0) {
+  if (!tasks || tasks.length === 0) {
     return (
       <div className="text-center py-8">
         <ClipboardList className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-lg font-medium">No maintenance tasks found</h3>
-        <p className="mt-1 text-gray-500">Create a new task to get started</p>
+        <h3 className="mt-2 text-lg font-medium">
+          Aucune tâche de maintenance trouvée
+        </h3>
+        <p className="mt-1 text-gray-500">
+          Créez une nouvelle tâche pour commencer
+        </p>
       </div>
     );
   }
@@ -134,14 +140,23 @@ export function MaintenanceTaskList({
             <div className="font-medium">{task.title}</div>
             <div className="text-sm text-gray-500 flex flex-col sm:flex-row sm:items-center gap-2">
               <span>
-                {task.assetType}: {task.assetId}
+                {task.stationId
+                  ? `Station: ${task.stationId}`
+                  : task.parcelId
+                  ? `Parcelle: ${task.parcelId}`
+                  : "Général"}
               </span>
               <span className="hidden sm:inline">•</span>
-              <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+              <span>
+                Échéance:{" "}
+                {task.dueDate
+                  ? new Date(task.dueDate).toLocaleDateString()
+                  : "Non définie"}
+              </span>
               {task.assignedTo && (
                 <>
                   <span className="hidden sm:inline">•</span>
-                  <span>Assigned to: {task.assignedTo}</span>
+                  <span>Assigné à: {task.assignedTo}</span>
                 </>
               )}
             </div>
@@ -157,14 +172,16 @@ export function MaintenanceTaskList({
         </div>
       ))}
 
-      <div className="mt-6">
-        <Pagination
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-        />
-      </div>
+      {totalItems > itemsPerPage && (
+        <div className="mt-6">
+          <Pagination
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
 
       {selectedTask && (
         <>

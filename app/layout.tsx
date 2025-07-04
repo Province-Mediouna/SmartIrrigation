@@ -2,7 +2,7 @@ import type React from "react";
 import { Inter } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
-
+import { PlatformListener } from "@/components/PlatformListener";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -18,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <Providers>
+          <PlatformListener />
+          {children}
+        </Providers>
       </body>
     </html>
   );

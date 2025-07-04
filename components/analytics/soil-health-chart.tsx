@@ -1,26 +1,40 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend } from "recharts"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 interface SoilHealthChartProps {
-  parcelId?: string
+  parcelId?: string;
 }
 
 export function SoilHealthChart({ parcelId }: SoilHealthChartProps) {
-  const [data, setData] = useState<any | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [view, setView] = useState<"radar" | "nutrients">("radar")
+  const [data, setData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [view, setView] = useState<"radar" | "nutrients">("radar");
 
   useEffect(() => {
     const fetchSoilHealthData = async () => {
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         // In a real app, we would call the API
         // const params = new URLSearchParams();
         // if (parcelId) params.append("parcelId", parcelId);
@@ -28,7 +42,7 @@ export function SoilHealthChart({ parcelId }: SoilHealthChartProps) {
         // setData(response);
 
         // Simulate API call with mock data
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Mock data
         const mockData = {
@@ -49,35 +63,35 @@ export function SoilHealthChart({ parcelId }: SoilHealthChartProps) {
             { name: "Soufre (S)", current: 30, optimal: 35 },
             { name: "Fer (Fe)", current: 45, optimal: 40 },
           ],
-        }
+        };
 
-        setData(mockData)
-        setError(null)
+        setData(mockData);
+        setError(null);
       } catch (err) {
-        setError(err as Error)
-        console.error("Failed to fetch soil health data:", err)
+        setError(err as Error);
+        console.error("Failed to fetch soil health data:", err);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchSoilHealthData()
-  }, [parcelId])
+    fetchSoilHealthData();
+  }, [parcelId]);
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Santé du sol</CardTitle>
-          <CardDescription>
+          <div className="text-sm text-muted-foreground">
             <Skeleton className="h-4 w-40" />
-          </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-[400px] w-full" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error || !data) {
@@ -89,19 +103,25 @@ export function SoilHealthChart({ parcelId }: SoilHealthChartProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Impossible de charger les données de santé du sol. Veuillez réessayer.
+            Impossible de charger les données de santé du sol. Veuillez
+            réessayer.
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Santé du sol</CardTitle>
-        <CardDescription>Analyse des indicateurs de santé et de fertilité du sol</CardDescription>
-        <Tabs value={view} onValueChange={(v) => setView(v as "radar" | "nutrients")}>
+        <CardDescription>
+          Analyse des indicateurs de santé et de fertilité du sol
+        </CardDescription>
+        <Tabs
+          value={view}
+          onValueChange={(v) => setView(v as "radar" | "nutrients")}
+        >
           <TabsList>
             <TabsTrigger value="radar">Indicateurs globaux</TabsTrigger>
             <TabsTrigger value="nutrients">Nutriments</TabsTrigger>
@@ -112,11 +132,22 @@ export function SoilHealthChart({ parcelId }: SoilHealthChartProps) {
         {view === "radar" ? (
           <div className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data.radarData}>
+              <RadarChart
+                cx="50%"
+                cy="50%"
+                outerRadius="80%"
+                data={data.radarData}
+              >
                 <PolarGrid />
                 <PolarAngleAxis dataKey="metric" />
                 <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                <Radar name="Valeur actuelle" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+                <Radar
+                  name="Valeur actuelle"
+                  dataKey="value"
+                  stroke="#3b82f6"
+                  fill="#3b82f6"
+                  fillOpacity={0.6}
+                />
                 <Legend />
               </RadarChart>
             </ResponsiveContainer>
@@ -142,5 +173,5 @@ export function SoilHealthChart({ parcelId }: SoilHealthChartProps) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

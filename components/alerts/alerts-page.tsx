@@ -1,82 +1,103 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAlerts } from "@/hooks/use-alerts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { AlertTriangle, Bell, Search, Filter, RefreshCw } from "lucide-react"
-import { AlertDetailModal } from "@/components/alerts/alert-detail-modal"
-import { AlertRuleList } from "@/components/alerts/alert-rule-list"
-import { AlertStats } from "@/components/alerts/alert-stats"
-import { Pagination } from "@/components/ui/pagination"
-import type { Alert, AlertSeverity, AlertStatus } from "@/types/alert"
+import { useState } from "react";
+import { useAlerts } from "@/hooks/use-alerts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle, Bell, Search, Filter, RefreshCw } from "lucide-react";
+import { AlertDetailModal } from "@/components/alerts/alert-detail-modal";
+import { AlertRuleList } from "@/components/alerts/alert-rule-list";
+import { AlertStats } from "@/components/alerts/alert-stats";
+import { Pagination } from "@/components/ui/pagination";
+import type { Alert, AlertSeverity, AlertStatus } from "@/types/alert";
+import { MOCK_ALERTS } from "@/lib/mocks/alert-mocks";
+import { Alert as UiAlert, AlertDescription } from "@/components/ui/alert";
 
 export function AlertsPage() {
-  const [activeTab, setActiveTab] = useState("alerts")
-  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<AlertStatus | undefined>(undefined)
-  const [severityFilter, setSeverityFilter] = useState<AlertSeverity | undefined>(undefined)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState("alerts");
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<AlertStatus | undefined>(
+    undefined
+  );
+  const [severityFilter, setSeverityFilter] = useState<
+    AlertSeverity | undefined
+  >(undefined);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { alerts, loading, error, refreshAlerts } = useAlerts(statusFilter, severityFilter)
+  const { alerts, loading, error, refreshAlerts } = useAlerts(
+    statusFilter,
+    severityFilter
+  );
+  const isMock = alerts === MOCK_ALERTS;
 
   // Filter alerts by search query
   const filteredAlerts = alerts.filter((alert) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
     return (
       alert.message.toLowerCase().includes(query) ||
       alert.type.toLowerCase().includes(query) ||
       alert.source.toLowerCase().includes(query)
-    )
-  })
+    );
+  });
 
   const handleAlertClick = (alert: Alert) => {
-    setSelectedAlert(alert)
-    setIsDetailModalOpen(true)
-  }
+    setSelectedAlert(alert);
+    setIsDetailModalOpen(true);
+  };
 
   const handleRefresh = () => {
-    refreshAlerts()
-  }
+    refreshAlerts();
+  };
 
   const handleClearFilters = () => {
-    setStatusFilter(undefined)
-    setSeverityFilter(undefined)
-    setSearchQuery("")
-  }
+    setStatusFilter(undefined);
+    setSeverityFilter(undefined);
+    setSearchQuery("");
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "high":
-        return "bg-red-500"
+        return "bg-red-500";
       case "medium":
-        return "bg-orange-500"
+        return "bg-orange-500";
       case "low":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
-        return "bg-blue-500"
+        return "bg-blue-500";
       case "read":
-        return "bg-purple-500"
+        return "bg-purple-500";
       case "resolved":
-        return "bg-green-500"
+        return "bg-green-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -87,6 +108,22 @@ export function AlertsPage() {
           Refresh
         </Button>
       </div>
+
+      {error && (
+        <UiAlert variant="destructive">
+          <AlertDescription>
+            Erreur lors de la récupération des alertes : {error.message}
+          </AlertDescription>
+        </UiAlert>
+      )}
+      {isMock && !error && (
+        <UiAlert variant="warning">
+          <AlertDescription>
+            Les données affichées sont des exemples (mockups) car l'API n'est
+            pas disponible.
+          </AlertDescription>
+        </UiAlert>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -101,7 +138,9 @@ export function AlertsPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <CardTitle>Alert List</CardTitle>
-                  <CardDescription>View and manage system alerts</CardDescription>
+                  <CardDescription>
+                    View and manage system alerts
+                  </CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <div className="relative w-full sm:w-64">
@@ -114,7 +153,12 @@ export function AlertsPage() {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value || undefined)}>
+                    <Select
+                      value={statusFilter}
+                      onValueChange={(value: any) =>
+                        setStatusFilter(value || undefined)
+                      }
+                    >
                       <SelectTrigger className="w-[130px]">
                         <div className="flex items-center">
                           <Filter className="mr-2 h-4 w-4" />
@@ -131,7 +175,9 @@ export function AlertsPage() {
 
                     <Select
                       value={severityFilter}
-                      onValueChange={(value: any) => setSeverityFilter(value || undefined)}
+                      onValueChange={(value: any) =>
+                        setSeverityFilter(value || undefined)
+                      }
                     >
                       <SelectTrigger className="w-[130px]">
                         <div className="flex items-center">
@@ -148,7 +194,11 @@ export function AlertsPage() {
                     </Select>
 
                     {(statusFilter || severityFilter || searchQuery) && (
-                      <Button variant="ghost" size="icon" onClick={handleClearFilters}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleClearFilters}
+                      >
                         <span className="sr-only">Clear filters</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -175,7 +225,10 @@ export function AlertsPage() {
               {loading ? (
                 <div className="space-y-4">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="space-y-2">
                         <Skeleton className="h-5 w-64" />
                         <Skeleton className="h-4 w-32" />
@@ -220,12 +273,18 @@ export function AlertsPage() {
                           <span className="hidden sm:inline">•</span>
                           <span>{alert.source}</span>
                           <span className="hidden sm:inline">•</span>
-                          <span>{new Date(alert.timestamp).toLocaleString()}</span>
+                          <span>
+                            {new Date(alert.timestamp).toLocaleString()}
+                          </span>
                         </div>
                       </div>
                       <div className="flex space-x-2 mt-2 sm:mt-0">
-                        <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
-                        <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
+                        <Badge className={getSeverityColor(alert.severity)}>
+                          {alert.severity}
+                        </Badge>
+                        <Badge className={getStatusColor(alert.status)}>
+                          {alert.status}
+                        </Badge>
                       </div>
                     </div>
                   ))}
@@ -258,11 +317,11 @@ export function AlertsPage() {
       <AlertDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => {
-          setIsDetailModalOpen(false)
-          setSelectedAlert(null)
+          setIsDetailModalOpen(false);
+          setSelectedAlert(null);
         }}
         alert={selectedAlert}
       />
     </div>
-  )
+  );
 }

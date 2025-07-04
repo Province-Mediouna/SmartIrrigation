@@ -11,6 +11,7 @@ import type {
   FlightPlan,
   DroneCommand,
 } from "../types/drone"
+import { MOCK_DRONES } from "@/lib/mocks/drone-mocks"
 
 class DronesService extends ApiService {
   private readonly DRONES_ENDPOINT = "/drones"
@@ -21,10 +22,10 @@ class DronesService extends ApiService {
   // Drones
   async getAllDrones(): Promise<Drone[]> {
     try {
-      return await this.get<Drone[]>(this.DRONES_ENDPOINT)
+      return await this.get<Drone[]>("drones")
     } catch (error) {
-      console.error("Failed to fetch drones:", error)
-      throw error
+      console.warn("API drones indisponible, utilisation des mockups.")
+      return MOCK_DRONES
     }
   }
 

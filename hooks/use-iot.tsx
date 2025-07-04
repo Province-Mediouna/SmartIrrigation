@@ -13,9 +13,9 @@ export function useIoTDevices(filter?: IoTDeviceFilter) {
   const fetchDevices = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await iotService.getDevices(filter)
-      setDevices(response.data)
-      setTotalCount(response.totalCount)
+      const response = await iotService.getAllDevices()
+      setDevices(response)
+      setTotalCount(response.length)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to fetch IoT devices"))
@@ -23,7 +23,7 @@ export function useIoTDevices(filter?: IoTDeviceFilter) {
     } finally {
       setLoading(false)
     }
-  }, [filter])
+  }, [])
 
   useEffect(() => {
     fetchDevices()
